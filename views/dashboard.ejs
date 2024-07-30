@@ -30,6 +30,13 @@
     .btn-secondary:hover {
       background-color: #5a6268;
     }
+    .btn-info {
+      background-color: #17a2b8;
+      border: none;
+    }
+    .btn-info:hover {
+      background-color: #138496;
+    }
     .shadow-custom {
       box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     }
@@ -50,6 +57,8 @@
     <div class="mb-4">
       <button type="button" class="btn btn-primary mr-2" data-toggle="modal" data-target="#registerModal">Register a New Member</button>
       <button type="button" class="btn btn-secondary" data-toggle="modal" data-target="#uploadModal">Bulk Upload Members</button>
+      <!-- New Button for All Members -->
+      <a href="/admin/members" class="btn btn-info">View All Members</a>
     </div>
 
     <!-- Unpaid Members List -->
@@ -70,7 +79,7 @@
               <% unpaidMembers.forEach(member => { %>
                 <tr>
                   <td><%= member.name %></td>
-                  <td><%= new Date(member.joinDate).toDateString() %></td>
+                  <td><%= new Date(member.joinDate).toLocaleDateString('en-GB') %></td>
                   <td>
                     <span class="badge badge-fees-paid">
                       <%= member.completed ? 'Fees Paid' : 'Pending' %>
@@ -106,7 +115,7 @@
           <form action="/admin/register" method="POST" class="bg-white p-4 rounded shadow-custom">
             <div class="form-group">
               <label for="name">Name:</label>
-              <input type="text" id="name" name="name" required class="form-control">
+              <input type="text" id="name" name="name"  maxlength="30" class="form-control">
             </div>
             <div class="form-group">
               <label for="joinDate">Join Date:</label>

@@ -102,58 +102,61 @@ router.post('/upload', upload.single('file'), async (req, res) => {
   }
 });
 
+// Route to display all registered members
+router.get('/members', async (req, res) => {
+  try {
+    const members = await Member.find(); // Fetch all members from the database
+    res.render('members', { members });
+  } catch (error) {
+    console.error(error);
+    res.status(500).send('Error fetching members.');
+  }
+});
 
-router.post('/mark-completed', async (req, res) => {
-    const { memberId } = req.body;
-    
-    try {
-      await Member.findByIdAndUpdate(memberId, { completed: true });
-      res.redirect('/admin/dashboard');
-    } catch (error) {
-      console.error(error);
-      res.status(500).send('Error updating member status.');
-    }
-  })
+// Route to update member details
+router.post('/update-member', async (req, res) => {
+  const { memberId, name, joinDate, feesPaid } = req.body;
 
+  try {
+    await Member.findByIdAndUpdate(memberId, {
+      name,
+      joinDate: new Date(joinDate),
+      feesPaid: feesPaid === 'on'
+    });
+    res.redirect('/admin/members');
+  } catch (error) {
+    console.error(error);
+    res.status(500).send('Error updating member.');
+  }
+});
 
-// Update a member's completed status
-router.post('/mark-completed', async (req, res) => {
-    const { memberId } = req.body;
-    
-    if (!memberId) {
-      return res.status(400).send('Member ID is required.');
-    }
-  
-    try {
-      const member = await Member.findById(memberId);
-      if (!member) {
-        return res.status(404).send('Member not found.');
-      }
-  
-      await Member.findByIdAndUpdate(memberId, { feesPaid: true, completed: true });
-      res.redirect('/admin/dashboard');
-    } catch (error) {
-      console.error(error);
-      res.status(500).send('Error updating member status.');
-    }
-  });
-  
-  
+// Route to delete a member
+router.post('/delete-member', async (req, res) => {
+  const { memberId } = req.body;
+
+  try {
+    await Member.findByIdAndDelete(memberId);
+    res.redirect('/admin/members');
+  } catch (error) {
+    console.error(error);
+    res.status(500).send('Error deleting member.');
+  }
+});
 
 async function processMemberData(data) {
-    try {
-      for (const item of data) {
-        await Member.create({
-          name: item.name,
-          joinDate: new Date(item.joinDate), // Ensure joinDate is a Date object
-          feesPaid: item.feesPaid === 'true' || item.feesPaid === true
-        });
-      }
-      res.redirect('/admin/dashboard');
-    } catch (error) {
-      console.error(error);
-      res.status(500).send('Error processing file.');
+  try {
+    for (const item of data) {
+      await Member.create({
+        name: item.name,
+        joinDate: new Date(item.joinDate), // Ensure joinDate is a Date object
+        feesPaid: item.feesPaid === 'true' || item.feesPaid === true
+      });
     }
+    res.redirect('/admin/dashboard');
+  } catch (error) {
+    console.error(error);
+    res.status(500).send('Error processing file.');
   }
+}
   
 module.exports = router;
