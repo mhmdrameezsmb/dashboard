@@ -33,6 +33,10 @@
     .shadow-custom {
       box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     }
+    .badge-fees-paid {
+      background-color: #28a745; /* Green color */
+      color: white;
+    }
   </style>
 </head>
 <body>
@@ -56,10 +60,14 @@
           <% unpaidMembers.forEach(member => { %>
             <li class="list-group-item d-flex justify-content-between align-items-center">
               <%= member.name %> 
-              <span class="badge badge-secondary">Joined on: <%= new Date(member.joinDate).toDateString() %></span>
-              <div>
-                <button class="btn btn-success btn-sm mark-completed" data-id="<%= member._id %>">Mark as Completed</button>
-              </div>
+              <span class="badge badge-fees-paid">
+                <%= member.completed ? 'Fees Paid' : 'Joined on: ' + new Date(member.joinDate).toDateString() %>
+              </span>
+              <% if (!member.completed) { %>
+                <div>
+                  <button class="btn btn-success btn-sm mark-completed" data-id="<%= member._id %>">Mark as Completed</button>
+                </div>
+              <% } %>
             </li>
           <% }) %>
         </ul>

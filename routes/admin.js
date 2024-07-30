@@ -131,7 +131,7 @@ router.post('/mark-completed', async (req, res) => {
         return res.status(404).send('Member not found.');
       }
   
-      await Member.findByIdAndUpdate(memberId, { completed: true });
+      await Member.findByIdAndUpdate(memberId, { feesPaid: true, completed: true });
       res.redirect('/admin/dashboard');
     } catch (error) {
       console.error(error);
