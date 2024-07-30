@@ -27,17 +27,49 @@ router.get('/register', (req, res) => {
 // Handle registration form submission
 router.post('/register', async (req, res) => {
   const { name, joinDate, feesPaid } = req.body;
-  const newMember = new Member({ name, joinDate, feesPaid });
-  await newMember.save();
-  res.redirect('/admin/dashboard');
+
+  // Convert feesPaid to boolean
+  const feesPaidBoolean = feesPaid === 'on'; // Adjust based on form input
+
+  const newMember = new Member({
+    name,
+    joinDate: new Date(joinDate),
+    feesPaid: feesPaidBoolean
+  });
+
+  try {
+    await newMember.save();
+    res.redirect('/admin/dashboard');
+  } catch (error) {
+    console.error(error);
+    res.status(500).send('Error saving member.');
+  }
 });
 
 // Dashboard
+// Dashboard
 router.get('/dashboard', async (req, res) => {
-  const today = new Date().toISOString().split('T')[0];
-  const unpaidMembers = await Member.find({ feesPaid: false });
-  res.render('dashboard', { today, unpaidMembers });
-});
+    const today = new Date();
+    const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+    const endOfMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+  
+    try {
+      // Find members who have not paid fees and have a joinDate within the current month
+      const unpaidMembers = await Member.find({
+        feesPaid: false,
+        joinDate: {
+          $gte: startOfMonth,
+          $lte: endOfMonth
+        }
+      });
+  
+      res.render('dashboard', { today: today.toISOString().split('T')[0], unpaidMembers });
+    } catch (error) {
+      console.error(error);
+      res.status(500).send('Error fetching dashboard data.');
+    }
+  });
+  
 
 // Get upload form
 router.get('/upload', (req, res) => {
@@ -71,20 +103,58 @@ router.post('/upload', upload.single('file'), async (req, res) => {
   }
 });
 
-async function processMemberData(data) {
-  try {
-    for (const item of data) {
-      await Member.create({
-        name: item.name,
-        joinDate: new Date(item.joinDate),
-        feesPaid: item.feesPaid === 'true'
-      });
-    }
-    res.redirect('/admin/dashboard');
-  } catch (error) {
-    console.error(error);
-    res.status(500).send('Error processing file.');
-  }
-}
 
+router.post('/mark-completed', async (req, res) => {
+    const { memberId } = req.body;
+    
+    try {
+      await Member.findByIdAndUpdate(memberId, { completed: true });
+      res.redirect('/admin/dashboard');
+    } catch (error) {
+      console.error(error);
+      res.status(500).send('Error updating member status.');
+    }
+  })
+
+
+// Update a member's completed status
+router.post('/mark-completed', async (req, res) => {
+    const { memberId } = req.body;
+    
+    if (!memberId) {
+      return res.status(400).send('Member ID is required.');
+    }
+  
+    try {
+      const member = await Member.findById(memberId);
+      if (!member) {
+        return res.status(404).send('Member not found.');
+      }
+  
+      await Member.findByIdAndUpdate(memberId, { completed: true });
+      res.redirect('/admin/dashboard');
+    } catch (error) {
+      console.error(error);
+      res.status(500).send('Error updating member status.');
+    }
+  });
+  
+  
+
+async function processMemberData(data) {
+    try {
+      for (const item of data) {
+        await Member.create({
+          name: item.name,
+          joinDate: new Date(item.joinDate), // Ensure joinDate is a Date object
+          feesPaid: item.feesPaid === 'true' || item.feesPaid === true
+        });
+      }
+      res.redirect('/admin/dashboard');
+    } catch (error) {
+      console.error(error);
+      res.status(500).send('Error processing file.');
+    }
+  }
+  
 module.exports = router;
