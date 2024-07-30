@@ -6,7 +6,7 @@ const adminRoutes = require('./routes/admin');
 const app = express();
 
 // Connect to MongoDB
-mongoose.connect('mongodb://localhost:27017/gym-admin-panel', {
+mongoose.connect('mongodb+srv://rameez:0@cluster0.xnqwvnx.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0l', {
   useNewUrlParser: true,
   useUnifiedTopology: true
 });
