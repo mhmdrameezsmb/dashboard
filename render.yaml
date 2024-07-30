@@ -1,0 +1,5 @@
+services:
+  - type: web
+    name: gym-admin-panel
+    buildCommand: npm install --production
+    startCommand: npm start
