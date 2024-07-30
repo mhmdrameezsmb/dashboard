@@ -47,7 +47,6 @@ router.post('/register', async (req, res) => {
 });
 
 // Dashboard
-// Dashboard
 router.get('/dashboard', async (req, res) => {
     const today = new Date();
     const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
