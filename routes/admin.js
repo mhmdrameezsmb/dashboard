@@ -48,27 +48,26 @@ router.post('/register', async (req, res) => {
 
 // Dashboard
 router.get('/dashboard', async (req, res) => {
-    const today = new Date();
-    const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
-    const endOfMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0);
-  
-    try {
-      // Find members who have not paid fees and have a joinDate within the current month
-      const unpaidMembers = await Member.find({
-        feesPaid: false,
-        joinDate: {
-          $gte: startOfMonth,
-          $lte: endOfMonth
-        }
-      });
-  
-      res.render('dashboard', { today: today.toISOString().split('T')[0], unpaidMembers });
-    } catch (error) {
-      console.error(error);
-      res.status(500).send('Error fetching dashboard data.');
-    }
-  });
-  
+  const today = new Date();
+  const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+  const endOfMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+
+  try {
+    // Find members who have not paid fees and have a joinDate within the current month
+    const unpaidMembers = await Member.find({
+      feesPaid: false,
+      joinDate: {
+        $gte: startOfMonth,
+        $lte: endOfMonth
+      }
+    });
+
+    res.render('dashboard', { today: today.toISOString().split('T')[0], unpaidMembers });
+  } catch (error) {
+    console.error(error);
+    res.status(500).send('Error fetching dashboard data.');
+  }
+});
 
 // Get upload form
 router.get('/upload', (req, res) => {
@@ -99,6 +98,22 @@ router.post('/upload', upload.single('file'), async (req, res) => {
       });
   } else {
     return res.status(400).send('Invalid file type. Only CSV and Excel files are supported.');
+  }
+
+  async function processMemberData(data) {
+    try {
+      for (const item of data) {
+        await Member.create({
+          name: item.name,
+          joinDate: new Date(item.joinDate), // Ensure joinDate is a Date object
+          feesPaid: item.feesPaid === 'true' || item.feesPaid === true
+        });
+      }
+      res.redirect('/admin/dashboard');
+    } catch (error) {
+      console.error(error);
+      res.status(500).send('Error processing file.');
+    }
   }
 });
 
@@ -143,20 +158,17 @@ router.post('/delete-member', async (req, res) => {
   }
 });
 
-async function processMemberData(data) {
+// Route to mark a member as completed
+router.post('/mark-completed', async (req, res) => {
+  const { memberId } = req.body;
+
   try {
-    for (const item of data) {
-      await Member.create({
-        name: item.name,
-        joinDate: new Date(item.joinDate), // Ensure joinDate is a Date object
-        feesPaid: item.feesPaid === 'true' || item.feesPaid === true
-      });
-    }
-    res.redirect('/admin/dashboard');
+    await Member.findByIdAndUpdate(memberId, { feesPaid: true });
+    res.status(200).send('Member marked as completed.');
   } catch (error) {
     console.error(error);
-    res.status(500).send('Error processing file.');
+    res.status(500).send('Error marking member as completed.');
   }
-}
-  
+});
+
 module.exports = router;
