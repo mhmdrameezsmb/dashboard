@@ -66,7 +66,7 @@
         <h4>Unpaid Members This Month</h4>
       </div>
       <div class="card-body">
-        <% if (unpaidMembers.length > 0) { %>
+        <% if (unpaidMembers && unpaidMembers.length > 0) { %>
           <div class="table-responsive">
             <table class="table table-striped table-bordered">
               <thead class="thead-dark">
@@ -177,15 +177,15 @@
   <script>
     // JavaScript to update the current date in the header
     document.getElementById('currentDate').textContent = '<%= today %>';
-
+  
     let memberIdToComplete = null;
-
+  
     // Attach click event to Mark as Paid buttons
     $('.mark-completed-btn').on('click', function() {
       memberIdToComplete = $(this).closest('tr').data('member-id');
       $('#confirmModal').modal('show');
     });
-
+  
     // Confirm button click event in the confirmation modal
     $('#confirmBtn').on('click', function() {
       $.ajax({
@@ -195,8 +195,12 @@
           memberId: memberIdToComplete
         },
         success: function(response) {
-          // Remove the member row from the table
-          $('tr[data-member-id="' + memberIdToComplete + '"]').remove();
+          if (response.success) {
+            // Re-fetch the unpaid members list
+            location.reload(); // This will reload the page and reflect the updated list
+          } else {
+            alert('Error marking member as completed.');
+          }
           $('#confirmModal').modal('hide');
         },
         error: function(xhr, status, error) {
@@ -206,5 +210,6 @@
       });
     });
   </script>
+  
 </body>
 </html>
