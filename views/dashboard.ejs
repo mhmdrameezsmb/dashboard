@@ -50,7 +50,7 @@
   <div class="container">
     <header class="mb-4">
       <h1 class="display-4 text-primary">Alsan Gym Dashboard</h1>
-      <p class="lead">Today's Date: <span id="currentDate"><%= today %></span></p>
+      <p class="lead">Date and Time: <strong><span id="currentDateTime"></span></strong></p>
     </header>
 
     <!-- Buttons for Navigation -->
@@ -175,17 +175,28 @@
   <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
   <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
   <script>
-    // JavaScript to update the current date in the header
-    document.getElementById('currentDate').textContent = '<%= today %>';
+    // JavaScript to update the current date and time in the header
+    function updateDateTime() {
+    const now = new Date();
+    const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true };
+    const formattedDate = now.toLocaleDateString('en-US', options);
+    document.getElementById('currentDateTime').textContent = formattedDate;
+  }
+
+  // Update the date and time when the page loads
+  updateDateTime();
   
+  // Optionally, update every second
+  setInterval(updateDateTime, 1000);
+
     let memberIdToComplete = null;
-  
+
     // Attach click event to Mark as Paid buttons
     $('.mark-completed-btn').on('click', function() {
       memberIdToComplete = $(this).closest('tr').data('member-id');
       $('#confirmModal').modal('show');
     });
-  
+
     // Confirm button click event in the confirmation modal
     $('#confirmBtn').on('click', function() {
       $.ajax({
@@ -210,6 +221,5 @@
       });
     });
   </script>
-  
 </body>
 </html>
