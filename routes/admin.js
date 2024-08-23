@@ -140,6 +140,10 @@ function excelSerialDateToJSDate(serial) {
 
 async function processMemberData(data, res, filePath) {
     try {
+        const today = new Date();
+        const currentMonth = today.getMonth() + 1;
+        const currentYear = today.getFullYear();
+
         for (const item of data) {
             try {
                 // Log raw data for debugging
@@ -153,21 +157,32 @@ async function processMemberData(data, res, filePath) {
                 if (typeof joinDateValue === 'number') {
                     joinDate = excelSerialDateToJSDate(joinDateValue);
                 } else {
-                    // Parse joinDate using moment if it's a string
-                    joinDate = moment(joinDateValue, 'MM-DD-YYYY', true).toDate();
+                    // Parse joinDate using moment with the correct format
+                    joinDate = moment(joinDateValue, 'DD-MM-YYYY', true).toDate();
                 }
 
                 if (isNaN(joinDate.getTime())) {
-                    throw new Error(`Invalid joinDate format for entry: ${item['Join Date\t']}`);
+                    throw new Error(`Invalid joinDate format for entry: ${joinDateValue}`);
                 }
 
                 // Convert Fees Paid to boolean
-                const feesPaid = item['Fees Paid'] === 'Yes';
+                const feesPaid = item['Fees Paid'].toLowerCase() === 'yes';
 
+                // Initialize paymentHistory
+                const paymentHistory = [
+                    {
+                        month: currentMonth,
+                        year: currentYear,
+                        paid: feesPaid
+                    }
+                ];
+
+                // Create new member with paymentHistory
                 const newMember = await Member.create({
                     name: item['Name'],
                     joinDate: joinDate,
-                    feesPaid: feesPaid
+                    feesPaid: feesPaid,
+                    paymentHistory: paymentHistory
                 });
 
                 // Emit event using req.io or global io
@@ -181,7 +196,6 @@ async function processMemberData(data, res, filePath) {
                 // Log error for specific date parsing issues
                 console.error('Error processing date for item:', item);
                 console.error('Date parsing error:', dateError.message);
-                // Optionally, you could collect these errors and return them to the user
             }
         }
 
@@ -194,6 +208,8 @@ async function processMemberData(data, res, filePath) {
         res.status(500).send('Error processing file.');
     }
 }
+
+
 
 // Route to display all registered members
 router.get('/members', async (req, res) => {
