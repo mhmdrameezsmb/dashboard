@@ -66,6 +66,11 @@
         <h4>Unpaid Members This Month</h4>
       </div>
       <div class="card-body">
+        <!-- Search Input -->
+        <div class="mb-3">
+          <input type="text" id="searchInput" class="form-control" placeholder="Search by member name">
+        </div>
+
         <% if (unpaidMembers && unpaidMembers.length > 0) { %>
           <div class="table-responsive">
             <table class="table table-striped table-bordered">
@@ -78,7 +83,7 @@
               </thead>
               <tbody id="membersTableBody">
                 <% unpaidMembers.forEach(member => { %>
-                  <tr data-member-id="<%= member._id %>">
+                  <tr data-member-id="<%= member._id %>" data-name="<%= member.name.toLowerCase() %>">
                     <td><%= member.name %></td>
                     <td><%= new Date(member.joinDate).toLocaleDateString() %></td>
                     <td>
@@ -177,47 +182,56 @@
   <script>
     // JavaScript to update the current date and time in the header
     function updateDateTime() {
-    const now = new Date();
-    const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true };
-    const formattedDate = now.toLocaleDateString('en-US', options);
-    document.getElementById('currentDateTime').textContent = formattedDate;
-  }
+      const now = new Date();
+      const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true };
+      const formattedDate = now.toLocaleDateString('en-US', options);
+      document.getElementById('currentDateTime').textContent = formattedDate;
+    }
 
-  // Update the date and time when the page loads
-  updateDateTime();
+    // Update the date and time when the page loads
+    updateDateTime();
   
-  // Optionally, update every second
-  setInterval(updateDateTime, 1000);
+    // Optionally, update every second
+    setInterval(updateDateTime, 1000);
 
     let memberIdToComplete = null;
 
-    // Attach click event to Mark as Paid buttons
-    $('.mark-completed-btn').on('click', function() {
-      memberIdToComplete = $(this).closest('tr').data('member-id');
-      $('#confirmModal').modal('show');
-    });
+    $(document).ready(function() {
+      // Search functionality
+      $('#searchInput').on('keyup', function() {
+        const searchValue = $(this).val().toLowerCase();
+        $('#membersTableBody tr').filter(function() {
+          $(this).toggle($(this).data('name').indexOf(searchValue) > -1);
+        });
+      });
 
-    // Confirm button click event in the confirmation modal
-    $('#confirmBtn').on('click', function() {
-      $.ajax({
-        url: '/admin/mark-completed',
-        method: 'POST',
-        data: {
-          memberId: memberIdToComplete
-        },
-        success: function(response) {
-          if (response.success) {
-            // Re-fetch the unpaid members list
-            location.reload(); // This will reload the page and reflect the updated list
-          } else {
+      // Attach click event to Mark as Paid buttons
+      $('.mark-completed-btn').on('click', function() {
+        memberIdToComplete = $(this).closest('tr').data('member-id');
+        $('#confirmModal').modal('show');
+      });
+
+      // Confirm button click event in the confirmation modal
+      $('#confirmBtn').on('click', function() {
+        $.ajax({
+          url: '/admin/mark-completed',
+          method: 'POST',
+          data: {
+            memberId: memberIdToComplete
+          },
+          success: function(response) {
+            if (response.success) {
+              location.reload();
+            } else {
+              alert('Error marking member as completed.');
+            }
+            $('#confirmModal').modal('hide');
+          },
+          error: function(xhr, status, error) {
             alert('Error marking member as completed.');
+            $('#confirmModal').modal('hide');
           }
-          $('#confirmModal').modal('hide');
-        },
-        error: function(xhr, status, error) {
-          alert('Error marking member as completed.');
-          $('#confirmModal').modal('hide');
-        }
+        });
       });
     });
   </script>
