@@ -179,7 +179,7 @@
   <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
   <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-  <script>
+  <!-- <script>
     // JavaScript to update the current date and time in the header
     function updateDateTime() {
       const now = new Date();
@@ -234,6 +234,71 @@
         });
       });
     });
+  </script> -->
+
+  <script>
+    // JavaScript to update the current date and time in the header
+    function updateDateTime() {
+      const now = new Date();
+      const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true };
+      const formattedDate = now.toLocaleDateString('en-US', options);
+      document.getElementById('currentDateTime').textContent = formattedDate;
+    }
+  
+    // Update the date and time when the page loads
+    updateDateTime();
+    
+    // Optionally, update every second
+    setInterval(updateDateTime, 1000);
+  
+    let memberIdToComplete = null;
+  
+    $(document).ready(function() {
+      // Search functionality
+      $('#searchInput').on('keyup', function() {
+        const searchValue = $(this).val().toLowerCase();
+        $('#membersTableBody tr').filter(function() {
+          $(this).toggle($(this).data('name').indexOf(searchValue) > -1);
+        });
+      });
+  
+      // Attach click event to Mark as Paid buttons
+      $('.mark-completed-btn').on('click', function() {
+        memberIdToComplete = $(this).closest('tr').data('member-id');
+        $('#confirmModal').modal('show');
+      });
+  
+      // Confirm button click event in the confirmation modal
+      $('#confirmBtn').on('click', function() {
+        // Disable the button and show loading state
+        $('#confirmBtn').prop('disabled', true).text('Processing...');
+  
+        $.ajax({
+          url: '/admin/mark-completed',
+          method: 'POST',
+          data: {
+            memberId: memberIdToComplete
+          },
+          success: function(response) {
+            if (response.success) {
+              location.reload();
+            } else {
+              alert('Error marking member as completed.');
+            }
+            $('#confirmModal').modal('hide');
+          },
+          error: function(xhr, status, error) {
+            alert('Error marking member as completed.');
+            $('#confirmModal').modal('hide');
+          },
+          complete: function() {
+            // Re-enable the button and reset text
+            $('#confirmBtn').prop('disabled', false).text('Confirm');
+          }
+        });
+      });
+    });
   </script>
+  
 </body>
 </html>
