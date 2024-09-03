@@ -45,6 +45,13 @@
       <h1 class="display-4 text-primary">All Registered Members</h1>
     </header>
 
+
+    <!-- Add Search Bar -->
+<div class="form-group">
+  <input type="text" id="searchInput" class="form-control" placeholder="Search Members by Name">
+</div>
+
+
     <!-- Members List -->
     <section>
       <h2 class="h3 mb-3">List of Members:</h2>
@@ -173,5 +180,20 @@
       });
     });
   </script>
+  <script>
+    document.getElementById('searchInput').addEventListener('keyup', function() {
+      const filter = this.value.toLowerCase();
+      const rows = document.querySelectorAll('tbody tr');
+  
+      rows.forEach(row => {
+        const nameCell = row.querySelector('td:first-child');
+        if (nameCell) {
+          const nameText = nameCell.textContent.toLowerCase();
+          row.style.display = nameText.includes(filter) ? '' : 'none';
+        }
+      });
+    });
+  </script>
+  
 </body>
 </html>
