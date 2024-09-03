@@ -63,6 +63,7 @@
                 <th>Name</th>
                 <th>Join Date</th>
                 <th>Status</th>
+                <th>Payment History</th>
                 <th>Actions</th>
               </tr>
             </thead>
@@ -72,9 +73,25 @@
                   <td><%= member.name %></td>
                   <td><%= new Date(member.joinDate).toLocaleDateString('en-GB') %></td>
                   <td>
-                    <span class="badge badge-fees-paid">
+                    <span class="badge <%= member.feesPaid ? 'badge-fees-paid' : 'badge-warning' %>">
                       <%= member.feesPaid ? 'Fees Paid' : 'Pending' %>
                     </span>
+                  </td>
+                  <td>
+                    <% if (member.paymentHistory && member.paymentHistory.length > 0) { %>
+                      <ul class="list-unstyled">
+                        <% member.paymentHistory.forEach(payment => { %>
+                          <li>
+                            Month: <%= payment.month %>, Year: <%= payment.year %> - 
+                            <span class="<%= payment.paid ? 'text-success' : 'text-danger' %>">
+                              <%= payment.paid ? 'Paid' : 'Not Paid' %>
+                            </span>
+                          </li>
+                        <% }) %>
+                      </ul>
+                    <% } else { %>
+                      No payment history available.
+                    <% } %>
                   </td>
                   <td>
                     <button class="btn btn-warning btn-sm edit-member" data-id="<%= member._id %>" data-name="<%= member.name %>" data-join-date="<%= new Date(member.joinDate).toISOString().split('T')[0] %>" data-fees-paid="<%= member.feesPaid %>">Edit</button>
