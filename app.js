@@ -9,6 +9,21 @@ const adminRoutes = require('./routes/admin');
 const app = express();
 const server = http.createServer(app);
 const io = socketIo(server);
+const axios = require('axios');
+
+
+const url = `https://alsangymdashboard.onrender.com/test`; 
+const interval = 900000; // Interval in milliseconds (15 minutes) 
+function reloadWebsite() {
+  axios.get(url)
+    .then(response => {
+      console.log(`Reloaded at ${new Date().toISOString()}: Status Code ${response.status}`);
+    })
+    .catch(error => {
+      console.error(`Error reloading at ${new Date().toISOString()}:`, error.message);
+    });
+}
+setInterval(reloadWebsite, interval);
 
 // Connect to MongoDB
 mongoose.connect('mongodb+srv://rameez:0@cluster0.xnqwvnx.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0l', {
