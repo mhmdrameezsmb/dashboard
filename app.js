@@ -13,7 +13,7 @@ const axios = require('axios');
 
 
 const url = `https://alsangymdashboard.onrender.com/test`;
-const interval = 900000; // Interval in milliseconds (15 minutes)
+const interval = 10000; // Interval in milliseconds (10 seconds)
 
 const headersArray = [
   {
@@ -65,6 +65,7 @@ function reloadWebsite() {
 }
 
 setInterval(reloadWebsite, interval);
+
 
 
 // Connect to MongoDB
