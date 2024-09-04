@@ -1,8 +1,7 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
-const   
- http = require('http');
+const http = require('http');
 const socketIo = require('socket.io');   
 
 const adminRoutes = require('./routes/admin');
@@ -32,6 +31,11 @@ app.get('/', (req, res) => {
     res.redirect('/admin/dashboard');
 });
 
+// Test route to verify the API is working
+app.get('/test', (req, res) => {
+    res.status(200).json({ message: 'Web Site is Working!' });
+});
+
 // Handle 404 errors
 app.use((req, res) => {
     res.status(404).send('Page Not Found');
@@ -53,5 +57,6 @@ io.on('connection', (socket) => {
     console.log('A user disconnected. Total connected users:', connectedUsers);
   });
 });
+
 // Export io for use in routes
 module.exports = io;
