@@ -49,13 +49,25 @@ const headersArray = [
 ];
 
 let headerIndex = 0;
+let elapsedSeconds = 0;
+
+function formatElapsedTime(seconds) {
+  const days = Math.floor(seconds / (24 * 60 * 60));
+  const hours = Math.floor((seconds % (24 * 60 * 60)) / (60 * 60));
+  const minutes = Math.floor((seconds % (60 * 60)) / 60);
+  const secs = seconds % 60;
+
+  return `${days}d ${hours}h ${minutes}m ${secs}s`;
+}
 
 function reloadWebsite() {
   const headers = headersArray[headerIndex];
 
   axios.get(url, { headers })
     .then(response => {
+      elapsedSeconds += interval / 1000;
       console.log(`Reloaded at ${new Date().toISOString()}: Status Code ${response.status} with Header Index ${headerIndex}`);
+      console.log(`Elapsed Time: ${formatElapsedTime(elapsedSeconds)}`);
     })
     .catch(error => {
       console.error(`Error reloading at ${new Date().toISOString()}:`, error.message);
@@ -65,7 +77,6 @@ function reloadWebsite() {
 }
 
 setInterval(reloadWebsite, interval);
-
 
 
 // Connect to MongoDB
